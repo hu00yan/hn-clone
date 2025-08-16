@@ -16,12 +16,14 @@ export default function PostList() {
 
   const loadPosts = async () => {
     try {
+      console.log('Fetching posts...');
       setLoading(true);
       const data = await fetchHotPosts();
+      console.log('Posts fetched:', data);
       setPosts(data);
     } catch (err) {
+      console.error('Error fetching posts:', err);
       setError('Failed to load posts');
-      console.error(err);
     } finally {
       setLoading(false);
     }

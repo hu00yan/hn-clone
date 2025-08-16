@@ -3,6 +3,7 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787';
 
 export async function fetchHotPosts() {
+  console.log('Fetching posts from:', `${API_BASE_URL}/posts/hot`);
   // For server-side rendering or static generation
   const res = await fetch(`${API_BASE_URL}/posts/hot`, {
     // Add cache settings for static export
@@ -10,8 +11,11 @@ export async function fetchHotPosts() {
       revalidate: 60 // Revalidate at most every 60 seconds
     }
   });
+  console.log('Fetch response status:', res.status);
   if (!res.ok) throw new Error('Failed to fetch posts');
-  return res.json();
+  const data = await res.json();
+  console.log('Fetch response data:', data);
+  return data;
 }
 
 export async function fetchPost(id: number) {
