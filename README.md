@@ -174,4 +174,4 @@ pnpm --filter frontend test
 
 6. **pnpm**: Efficient package manager that saves disk space by sharing dependencies between projects in a workspace.
 
-7. **Cloudflare Pages/Workers**: Provides a globally distributed, serverless deployment platform with excellent performance and a generous free tier.
+7. **Cloudflare Pages/Workers**: Provides a globally distributed, serverless deployment platform with excellent performance and a generous free tier.Trigger deployment
