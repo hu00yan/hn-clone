@@ -90,3 +90,4 @@ temp/
  wrangler.toml*.sqlite
 node_modules/
 .wrangler/state
+.wrangler/
