@@ -1,9 +1,6 @@
 // Use environment variable for API base URL, with fallback to localhost for development
-// For static export, we need to handle API calls differently
-const isServer = typeof window === 'undefined';
-const API_BASE_URL = isServer 
-  ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'
-  : process.env.NEXT_PUBLIC_API_URL || '/api';
+// For static export, we always use the full API URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787';
 
 export async function fetchHotPosts() {
   // For server-side rendering or static generation
