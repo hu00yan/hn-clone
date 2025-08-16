@@ -10,6 +10,7 @@
 - Responsive UI with Tailwind CSS
 - Testing setup with Vitest for backend and Jest for frontend
 - Support for multiple deployment options including Cloudflare Pages
+- Static export support for Next.js frontend
 - pnpm workspace configuration for efficient dependency management
 
 ## Security Review

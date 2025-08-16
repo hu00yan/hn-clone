@@ -4,16 +4,6 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
   
-  // Proxy API requests to the Hono.js backend during development
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://127.0.0.1:8787/:path*' // Proxy to Hono.js backend
-      }
-    ];
-  },
-  
   // Enable image optimization
   images: {
     domains: [], // Add domains here if you plan to use external images
@@ -21,6 +11,12 @@ const nextConfig: NextConfig = {
   
   // Enable compression
   compress: true,
+  
+  // Enable static export
+  output: 'export',
+  
+  // For static export, we need to disable trailing slashes
+  trailingSlash: false,
 };
 
 export default nextConfig;

@@ -1,49 +1,39 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import { Post, Comment } from '@/types';
 import { fetchPost, fetchComments } from '@/services/api';
 import PostDetail from '@/components/PostDetail';
 import CommentList from '@/components/CommentList';
-import { useParams } from 'next/navigation';
 
-export default function PostPage() {
-  const params = useParams();
-  const [post, setPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// This function is required for static export
+export async function generateStaticParams() {
+  // For demonstration, we're returning some sample IDs
+  // In a real application, you would fetch these from your API
+  return [{ id: '1' }, { id: '2' }, { id: '3' }];
+}
 
-  useEffect(() => {
-    if (params?.id) {
-      loadPostAndComments();
-    }
-  }, [params?.id]);
+export const dynamicParams = false; // Only generate static pages for the params returned by generateStaticParams
 
-  const loadPostAndComments = async () => {
-    try {
-      setLoading(true);
-      const postId = parseInt(Array.isArray(params.id) ? params.id[0] : params.id);
-      const postData = await fetchPost(postId);
-      const commentsData = await fetchComments(postId);
-      setPost(postData);
-      setComments(commentsData);
-    } catch (err) {
-      setError('Failed to load post');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <div className="container mx-auto px-4 py-8">Loading...</div>;
-  if (error) return <div className="container mx-auto px-4 py-8 text-red-500">{error}</div>;
-  if (!post) return <div className="container mx-auto px-4 py-8">Post not found</div>;
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <PostDetail post={post} />
-      <CommentList comments={comments} postId={post.id} onCommentSubmit={loadPostAndComments} />
-    </div>
-  );
+// Server-side rendering for static export
+export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
+  try {
+    // Resolve the params promise
+    const resolvedParams = await params;
+    const postId = parseInt(resolvedParams.id);
+    const post: Post = await fetchPost(postId);
+    const comments: Comment[] = await fetchComments(postId);
+    
+    // A dummy function for the CommentList component
+    const handleCommentSubmit = () => {
+      // This is a static export, so we can't actually submit comments
+      // In a real application, this would be handled differently
+    };
+    
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <PostDetail post={post} />
+        <CommentList comments={comments} postId={post.id} onCommentSubmit={handleCommentSubmit} />
+      </div>
+    );
+  } catch (err) {
+    return <div className="container mx-auto px-4 py-8 text-red-500">Failed to load post</div>;
+  }
 }

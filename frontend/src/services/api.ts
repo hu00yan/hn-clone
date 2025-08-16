@@ -1,20 +1,38 @@
 // Use environment variable for API base URL, with fallback to localhost for development
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787';
+// For static export, we need to handle API calls differently
+const isServer = typeof window === 'undefined';
+const API_BASE_URL = isServer 
+  ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'
+  : process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export async function fetchHotPosts() {
-  const res = await fetch(`${API_BASE_URL}/posts/hot`);
+  // For server-side rendering or static generation
+  const res = await fetch(`${API_BASE_URL}/posts/hot`, {
+    // Add cache settings for static export
+    next: { 
+      revalidate: 60 // Revalidate at most every 60 seconds
+    }
+  });
   if (!res.ok) throw new Error('Failed to fetch posts');
   return res.json();
 }
 
 export async function fetchPost(id: number) {
-  const res = await fetch(`${API_BASE_URL}/posts/${id}`);
+  const res = await fetch(`${API_BASE_URL}/posts/${id}`, {
+    next: { 
+      revalidate: 60 // Revalidate at most every 60 seconds
+    }
+  });
   if (!res.ok) throw new Error('Failed to fetch post');
   return res.json();
 }
 
 export async function fetchComments(postId: number) {
-  const res = await fetch(`${API_BASE_URL}/comments/post/${postId}`);
+  const res = await fetch(`${API_BASE_URL}/comments/post/${postId}`, {
+    next: { 
+      revalidate: 60 // Revalidate at most every 60 seconds
+    }
+  });
   if (!res.ok) throw new Error('Failed to fetch comments');
   return res.json();
 }
