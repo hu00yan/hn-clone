@@ -87,4 +87,6 @@ temp/
 .vercel/
 
 # Cloudflare Wrangler
- wrangler.toml
+ wrangler.toml*.sqlite
+node_modules/
+.wrangler/state

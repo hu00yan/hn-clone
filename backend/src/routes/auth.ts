@@ -3,7 +3,7 @@ import { signJwt } from '../auth/jwt';
 import { Env, Variables, NewUser } from '../types';
 import { eq } from 'drizzle-orm';
 import { users } from '../db/schema';
-import { hash, verify } from 'argon2';
+import { hashPassword, verifyPassword } from '../auth/jwt';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -27,8 +27,8 @@ app.post('/register', async (c) => {
     return c.json({ error: 'User already exists' }, 400);
   }
   
-  // Hash the password using argon2 for security
-  const hashedPassword = await hash(password);
+  // Hash the password using bcrypt for security
+  const hashedPassword = await hashPassword(password);
   
   // Create the new user object
   const newUser: NewUser = {
@@ -69,8 +69,8 @@ app.post('/login', async (c) => {
   
   const user = result[0];
   
-  // Verify the password using argon2's verify function
-  const validPassword = await verify(user.password, password);
+  // Verify the password using bcrypt's verify function
+  const validPassword = await verifyPassword(password, user.password);
   if (!validPassword) {
     return c.json({ error: 'Invalid credentials' }, 400);
   }

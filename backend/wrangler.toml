@@ -1,6 +1,7 @@
 name = "hn-clone-api"
 main = "src/index.ts"
-compatibility_date = "2023-12-01"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 
 # D1 Database configuration
 # Create a database with: `wrangler d1 create hn-clone-db`
@@ -8,7 +9,8 @@ compatibility_date = "2023-12-01"
 [[ d1_databases ]]
 binding = "DB" # Available in your worker on env.DB
 database_name = "hn-clone-db"
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # Replace with your D1 database ID
+database_id = "0f0bef4a-7de0-46d5-877e-20b9cc09f672" # Actual database ID
+migrations_dir = "drizzle"
 
 # Environment variables
 # In production, set these in the Cloudflare dashboard
