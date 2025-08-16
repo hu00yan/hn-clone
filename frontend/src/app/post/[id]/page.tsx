@@ -1,27 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { Post, Comment } from '@/types';
 import { fetchPost, fetchComments } from '@/services/api';
 import PostDetail from '@/components/PostDetail';
 import CommentList from '@/components/CommentList';
+import { useParams } from 'next/navigation';
 
-export default function PostPage({ params }: { params: { id: string } }) {
+export default function PostPage() {
+  const params = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPostAndComments();
-  }, [params.id]);
+    if (params?.id) {
+      loadPostAndComments();
+    }
+  }, [params?.id]);
 
   const loadPostAndComments = async () => {
     try {
       setLoading(true);
-      const postData = await fetchPost(parseInt(params.id));
-      const commentsData = await fetchComments(parseInt(params.id));
+      const postId = parseInt(Array.isArray(params.id) ? params.id[0] : params.id);
+      const postData = await fetchPost(postId);
+      const commentsData = await fetchComments(postId);
       setPost(postData);
       setComments(commentsData);
     } catch (err) {
