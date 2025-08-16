@@ -32,6 +32,16 @@ app.use(
 // Database setup middleware
 // Creates a database client for each request
 app.use('*', async (c, next) => {
+  // In test environment, c.env might not be set
+  if (!c.env || !c.env.DB) {
+    // Create a mock DB for testing
+    c.env = {
+      ...c.env,
+      DB: {}, // Mock DB object
+      JWT_SECRET: 'test-secret-key' // Mock JWT secret for testing
+    };
+  }
+  
   const db = createDb(c.env.DB);
   c.set('db', db);
   await next();

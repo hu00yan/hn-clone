@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import app from '../src/index';
-import { createDb } from '../src/db/client';
+import app from '../index';
+import { createDb } from '../db/client';
 
 // Mock the database
 const mockDb = {
@@ -17,14 +17,37 @@ const mockDb = {
   set: vi.fn().mockReturnThis(),
 };
 
-vi.mock('../src/db/client', () => ({
+// Mock environment
+const mockEnv = {
+  DB: {}, // Mock DB object
+  JWT_SECRET: 'test-secret-key'
+};
+
+vi.mock('../db/client', () => ({
   createDb: vi.fn(() => mockDb),
 }));
 
 // Mock JWT verification
-vi.mock('../src/auth/jwt', () => ({
+vi.mock('../auth/jwt', () => ({
   verifyJwt: vi.fn().mockResolvedValue({ id: 1, email: 'test@example.com', username: 'testuser' }),
 }));
+
+// Mock the context
+vi.mock('hono', async () => {
+  const actual = await vi.importActual('hono');
+  return {
+    ...actual,
+    createHono: () => {
+      const app = actual.createHono();
+      // Mock the context for all requests
+      app.use('*', (c, next) => {
+        c.env = mockEnv;
+        return next();
+      });
+      return app;
+    }
+  };
+});
 
 describe('Posts Routes', () => {
   beforeEach(() => {
@@ -32,12 +55,16 @@ describe('Posts Routes', () => {
   });
 
   it('should get hot posts', async () => {
-    mockDb.select.mockReturnThis();
-    mockDb.from.mockReturnThis();
-    mockDb.leftJoin.mockReturnThis();
-    mockDb.orderBy.mockReturnThis();
-    mockDb.limit.mockReturnThis();
-    mockDb.returning.mockResolvedValue([
+    // Reset mock calls
+    vi.clearAllMocks();
+    
+    // Properly mock the database chain
+    mockDb.select.mockReturnValueOnce(mockDb);
+    mockDb.from.mockReturnValueOnce(mockDb);
+    mockDb.leftJoin.mockReturnValueOnce(mockDb);
+    mockDb.orderBy.mockReturnValueOnce(mockDb);
+    mockDb.limit.mockReturnValueOnce(mockDb);
+    mockDb.returning.mockResolvedValueOnce([
       { 
         id: 1, 
         title: 'Test Post',
@@ -56,6 +83,17 @@ describe('Posts Routes', () => {
   });
 
   it('should submit a new post when authenticated', async () => {
+    // Mock the insert query to return a post
+    mockDb.insert.mockReturnValueOnce(mockDb);
+    mockDb.values.mockReturnValueOnce(mockDb);
+    mockDb.returning.mockResolvedValueOnce([{ 
+      id: 1, 
+      title: 'New Test Post',
+      url: 'https://example.com',
+      text: null,
+      authorId: 1
+    }]);
+    
     const response = await app.request('/posts/submit', {
       method: 'POST',
       headers: {
@@ -71,6 +109,6 @@ describe('Posts Routes', () => {
     expect(response.status).toBe(200);
     const data = await response.json();
     expect(data.id).toBe(1);
-    expect(data.title).toBe('Test Post'); // This would be the actual post from the mock
+    expect(data.title).toBe('New Test Post');
   });
 });

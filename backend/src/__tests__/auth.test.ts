@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import app from '../src/index';
-import { createDb } from '../src/db/client';
+import app from '../index';
+import { createDb } from '../db/client';
 
 // Mock the database
 const mockDb = {
@@ -13,9 +13,35 @@ const mockDb = {
   returning: vi.fn().mockResolvedValue([{ id: 1, email: 'test@example.com', username: 'testuser' }]),
 };
 
-vi.mock('../src/db/client', () => ({
+// Mock hashed password for login test
+const mockHashedPassword = '$argon2id$v=19$m=65536,t=3,p=4$...';
+
+// Mock environment
+const mockEnv = {
+  DB: {}, // Mock DB object
+  JWT_SECRET: 'test-secret-key'
+};
+
+vi.mock('../db/client', () => ({
   createDb: vi.fn(() => mockDb),
 }));
+
+// Mock the context
+vi.mock('hono', async () => {
+  const actual = await vi.importActual('hono');
+  return {
+    ...actual,
+    createHono: () => {
+      const app = actual.createHono();
+      // Mock the context for all requests
+      app.use('*', (c, next) => {
+        c.env = mockEnv;
+        return next();
+      });
+      return app;
+    }
+  };
+});
 
 describe('Auth Routes', () => {
   beforeEach(() => {
@@ -46,17 +72,29 @@ describe('Auth Routes', () => {
   });
 
   it('should login an existing user', async () => {
+    // Reset mock calls
+    vi.clearAllMocks();
+    
     // Mock the select query to return a user
-    mockDb.select.mockReturnThis();
-    mockDb.from.mockReturnThis();
-    mockDb.where.mockReturnThis();
-    mockDb.limit.mockReturnThis();
-    mockDb.returning.mockResolvedValue([{ 
+    mockDb.select.mockReturnValueOnce(mockDb);
+    mockDb.from.mockReturnValueOnce(mockDb);
+    mockDb.where.mockReturnValueOnce(mockDb);
+    mockDb.limit.mockReturnValueOnce(mockDb);
+    mockDb.returning.mockResolvedValueOnce([{ 
       id: 1, 
       email: 'test@example.com', 
       username: 'testuser',
-      password: '$argon2id$v=19$m=65536,t=3,p=4$...' // Mock hashed password
+      password: mockHashedPassword // Mock hashed password
     }]);
+
+    // Mock verifyPassword to return true
+    vi.mock('../auth/jwt', async () => {
+      const actual = await vi.importActual('../auth/jwt');
+      return {
+        ...actual,
+        verifyPassword: vi.fn().mockResolvedValue(true)
+      };
+    });
 
     const response = await app.request('/auth/login', {
       method: 'POST',
