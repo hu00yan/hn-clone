@@ -2,13 +2,15 @@ import { SignJWT, jwtVerify } from 'jose';
 import { Env } from '../types';
 import * as bcrypt from 'bcryptjs';
 
-const JWT_SECRET = 'your-secret-key-change-in-production';
 const SALT_ROUNDS = 10;
 
 export async function signJwt(payload: any, env: Env) {
-  const secret = new TextEncoder().encode(
-    env.JWT_SECRET ?? JWT_SECRET
-  );
+  // JWT_SECRET must be set in environment variables for production
+  if (!env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not set in environment variables');
+  }
+  
+  const secret = new TextEncoder().encode(env.JWT_SECRET);
   
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + 60 * 60 * 24 * 7; // 7 days
@@ -22,9 +24,12 @@ export async function signJwt(payload: any, env: Env) {
 
 export async function verifyJwt(token: string, env: Env) {
   try {
-    const secret = new TextEncoder().encode(
-      env.JWT_SECRET ?? JWT_SECRET
-    );
+    // JWT_SECRET must be set in environment variables for production
+    if (!env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not set in environment variables');
+    }
+    
+    const secret = new TextEncoder().encode(env.JWT_SECRET);
     
     const { payload } = await jwtVerify(token, secret);
     return payload;

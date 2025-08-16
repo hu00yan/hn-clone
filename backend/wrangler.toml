@@ -17,4 +17,4 @@ migrations_dir = "drizzle"
 [vars]
 # JWT secret - MUST be changed in production
 # Generate a strong secret with: `openssl rand -base64 32`
-JWT_SECRET = "your-super-secret-jwt-key-change-in-production"
+# JWT_SECRET = "your-super-secret-jwt-key-change-in-production" # Not set here for security, must be set in Cloudflare dashboard
