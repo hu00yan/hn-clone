@@ -1,8 +1,6 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "hn-clone-frontend"
-main = ".next/server.js"
-site.bucket = ".next"
-build.command = "npm run build"
+pages_build_output_dir = ".next"
 
 [vars]
 NEXT_PUBLIC_API_URL = "https://hn-clone-api.hacker-news-roo.workers.dev"
