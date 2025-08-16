@@ -1,0 +1,18 @@
+name = "hn-clone-api"
+main = "src/index.ts"
+compatibility_date = "2023-12-01"
+
+# D1 Database configuration
+# Create a database with: `wrangler d1 create hn-clone-db`
+# Then update the database_id with your actual database ID
+[[ d1_databases ]]
+binding = "DB" # Available in your worker on env.DB
+database_name = "hn-clone-db"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # Replace with your D1 database ID
+
+# Environment variables
+# In production, set these in the Cloudflare dashboard
+[vars]
+# JWT secret - MUST be changed in production
+# Generate a strong secret with: `openssl rand -base64 32`
+JWT_SECRET = "your-super-secret-jwt-key-change-in-production"

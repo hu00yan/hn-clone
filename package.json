@@ -1,0 +1,10 @@
+{
+  "name": "hn-clone",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter backend dev & pnpm --filter frontend dev",
+    "build": "pnpm --filter backend build && pnpm --filter frontend build",
+    "test": "pnpm --filter backend test && pnpm --filter frontend test",
+    "deploy": "pnpm --filter backend deploy && pnpm --filter frontend deploy"
+  }
+}
