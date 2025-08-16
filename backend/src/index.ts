@@ -8,6 +8,7 @@ import authRoutes from './routes/auth';
 import postRoutes from './routes/posts';
 import voteRoutes from './routes/votes';
 import commentRoutes from './routes/comments';
+import { users } from './db/schema';
 
 // Create the main Hono application
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -55,8 +56,27 @@ app.route('/votes', voteRoutes);
 app.route('/comments', commentRoutes);
 
 // Health check endpoint
-app.get('/', (c) => {
-  return c.json({ message: 'Hacker News Clone API is running!' });
+app.get('/', async (c) => {
+  try {
+    const db = c.get('db');
+    // Test database connection
+    const result = await db.select().from(users).limit(1);
+    return c.json({ 
+      message: 'Hacker News Clone API is running!',
+      jwtSecretKey: c.env.JWT_SECRET_KEY ? 'Set' : 'Not set',
+      jwtSecret: c.env.JWT_SECRET ? 'Set' : 'Not set',
+      database: 'Connected',
+      users: result.length
+    });
+  } catch (error) {
+    return c.json({ 
+      message: 'Hacker News Clone API is running!',
+      jwtSecretKey: c.env.JWT_SECRET_KEY ? 'Set' : 'Not set',
+      jwtSecret: c.env.JWT_SECRET ? 'Set' : 'Not set',
+      database: 'Error',
+      error: error.message
+    });
+  }
 });
 
 export default app;

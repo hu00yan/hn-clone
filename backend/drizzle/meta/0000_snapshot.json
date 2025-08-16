@@ -1,8 +1,6 @@
 {
-  "version": "5",
+  "version": "6",
   "dialect": "sqlite",
-  "id": "74010ab4-af0b-48af-8005-353bff1422c0",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "comments": {
       "name": "comments",
@@ -56,32 +54,33 @@
         "comments_post_id_posts_id_fk": {
           "name": "comments_post_id_posts_id_fk",
           "tableFrom": "comments",
-          "tableTo": "posts",
           "columnsFrom": [
             "post_id"
           ],
+          "tableTo": "posts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "comments_author_id_users_id_fk": {
           "name": "comments_author_id_users_id_fk",
           "tableFrom": "comments",
-          "tableTo": "users",
           "columnsFrom": [
             "author_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "posts": {
       "name": "posts",
@@ -151,19 +150,20 @@
         "posts_author_id_users_id_fk": {
           "name": "posts_author_id_users_id_fk",
           "tableFrom": "posts",
-          "tableTo": "users",
           "columnsFrom": [
             "author_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "users": {
       "name": "users",
@@ -223,7 +223,8 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     },
     "votes": {
       "name": "votes",
@@ -255,28 +256,28 @@
         "votes_user_id_users_id_fk": {
           "name": "votes_user_id_users_id_fk",
           "tableFrom": "votes",
-          "tableTo": "users",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "users",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         },
         "votes_post_id_posts_id_fk": {
           "name": "votes_post_id_posts_id_fk",
           "tableFrom": "votes",
-          "tableTo": "posts",
           "columnsFrom": [
             "post_id"
           ],
+          "tableTo": "posts",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {
@@ -288,13 +289,16 @@
           "name": "votes_user_id_post_id_pk"
         }
       },
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "_meta": {
-    "schemas": {},
     "tables": {},
     "columns": {}
-  }
+  },
+  "id": "74010ab4-af0b-48af-8005-353bff1422c0",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "views": {}
 }

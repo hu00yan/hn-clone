@@ -1,39 +1,22 @@
+import { getApiBaseUrl } from '@/config/env';
+
 // Use environment variable for API base URL, with fallback to localhost for development
-// For static export, we always use the full API URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787';
+const API_BASE_URL = getApiBaseUrl();
 
 export async function fetchHotPosts() {
-  console.log('Fetching posts from:', `${API_BASE_URL}/posts/hot`);
-  // For server-side rendering or static generation
-  const res = await fetch(`${API_BASE_URL}/posts/hot`, {
-    // Add cache settings for static export
-    next: { 
-      revalidate: 60 // Revalidate at most every 60 seconds
-    }
-  });
-  console.log('Fetch response status:', res.status);
+  const res = await fetch(`${API_BASE_URL}/posts/hot`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch posts');
-  const data = await res.json();
-  console.log('Fetch response data:', data);
-  return data;
+  return res.json();
 }
 
 export async function fetchPost(id: number) {
-  const res = await fetch(`${API_BASE_URL}/posts/${id}`, {
-    next: { 
-      revalidate: 60 // Revalidate at most every 60 seconds
-    }
-  });
+  const res = await fetch(`${API_BASE_URL}/posts/${id}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch post');
   return res.json();
 }
 
 export async function fetchComments(postId: number) {
-  const res = await fetch(`${API_BASE_URL}/comments/post/${postId}`, {
-    next: { 
-      revalidate: 60 // Revalidate at most every 60 seconds
-    }
-  });
+  const res = await fetch(`${API_BASE_URL}/comments/post/${postId}`, { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch comments');
   return res.json();
 }

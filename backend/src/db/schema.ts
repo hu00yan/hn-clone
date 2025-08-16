@@ -1,11 +1,12 @@
 import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
 
 export const users = sqliteTable('users', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   email: text('email').notNull().unique(),
   username: text('username').notNull().unique(),
   password: text('password').notNull(), // hashed
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now'))`),
 });
 
 export const posts = sqliteTable('posts', {
@@ -14,7 +15,7 @@ export const posts = sqliteTable('posts', {
   url: text('url'),
   text: text('text'),
   authorId: integer('author_id').notNull().references(() => users.id),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now'))`),
   upvotes: integer('upvotes').notNull().default(0),
   downvotes: integer('downvotes').notNull().default(0),
 });
@@ -25,7 +26,7 @@ export const comments = sqliteTable('comments', {
   authorId: integer('author_id').notNull().references(() => users.id),
   parentId: integer('parent_id'), // for nested comments
   text: text('text').notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(new Date()),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(sql`(strftime('%s', 'now'))`),
 });
 
 export const votes = sqliteTable('votes', {

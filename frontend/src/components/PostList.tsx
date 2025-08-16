@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Post } from '@/types';
 import { fetchHotPosts } from '@/services/api';
 import PostItem from '@/components/PostItem';
@@ -11,23 +11,23 @@ export default function PostList() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadPosts();
-  }, []);
+    let mounted = true;
+    fetchHotPosts()
+      .then((data: Post[]) => {
+        if (mounted) setPosts(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (mounted) setError('Failed to load posts');
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
 
-  const loadPosts = async () => {
-    try {
-      console.log('Fetching posts...');
-      setLoading(true);
-      const data = await fetchHotPosts();
-      console.log('Posts fetched:', data);
-      setPosts(data);
-    } catch (err) {
-      console.error('Error fetching posts:', err);
-      setError('Failed to load posts');
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div className="text-red-500">{error}</div>;

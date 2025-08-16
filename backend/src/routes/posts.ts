@@ -90,8 +90,8 @@ app.post('/submit', authMiddleware, async (c) => {
     return c.json({ error: 'Title and either URL or text are required' }, 400);
   }
   
-  // Create the new post object
-  const newPost: NewPost = {
+  // Create the new post object without createdAt to let the database set it
+  const newPost = {
     title,
     url: url || null,
     text: text || null,

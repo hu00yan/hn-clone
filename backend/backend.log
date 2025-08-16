@@ -1,0 +1,51 @@
+
+> hn-clone-backend@1.0.0 dev /Users/huyan00/mycode/hn-clone/backend
+> wrangler dev src/index.ts
+
+
+ ⛅️ wrangler 4.30.0
+───────────────────
+Using vars defined in .env
+Your Worker has access to the following bindings:
+Binding                                      Resource                  Mode
+env.DB (hn-clone-db)                         D1 Database               local
+env.JWT_SECRET ("(hidden)")                  Environment Variable      local
+env.DB_NAME ("(hidden)")                     Environment Variable      local
+env.DB_ID ("(hidden)")                       Environment Variable      local
+env.CLOUDFLARE_ACCOUNT_ID ("(hidden)")       Environment Variable      local
+
+⎔ Starting local server...
+[wrangler:info] Ready on http://localhost:8787
+<-- GET /
+--> GET / [32m200[0m 6ms
+[wrangler:info] GET / 200 OK (11ms)
+<-- POST /auth/register
+--> POST /auth/register [33m400[0m 3ms
+[wrangler:info] POST /auth/register 400 Bad Request (5ms)
+<-- POST /auth/register
+--> POST /auth/register [32m200[0m 102ms
+[wrangler:info] POST /auth/register 200 OK (103ms)
+<-- POST /auth/login
+--> POST /auth/login [32m200[0m 79ms
+[wrangler:info] POST /auth/login 200 OK (80ms)
+<-- POST /posts/submit
+--> POST /posts/submit [32m200[0m 4ms
+[wrangler:info] POST /posts/submit 200 OK (7ms)
+<-- POST /votes/post/5
+--> POST /votes/post/5 [32m200[0m 6ms
+[wrangler:info] POST /votes/post/5 200 OK (8ms)
+<-- POST /comments/post/5
+--> POST /comments/post/5 [32m200[0m 5ms
+[wrangler:info] POST /comments/post/5 200 OK (7ms)
+<-- GET /posts/hot
+--> GET /posts/hot [32m200[0m 2ms
+[wrangler:info] GET /posts/hot 200 OK (4ms)
+<-- GET /posts/hot
+--> GET /posts/hot [32m200[0m 2ms
+[wrangler:info] GET /posts/hot 200 OK (4ms)
+<-- POST /posts/submit
+--> POST /posts/submit [32m200[0m 3ms
+[wrangler:info] POST /posts/submit 200 OK (5ms)
+<-- GET /posts/hot
+--> GET /posts/hot [32m200[0m 2ms
+[wrangler:info] GET /posts/hot 200 OK (4ms)
