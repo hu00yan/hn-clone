@@ -10,6 +10,9 @@ import voteRoutes from './routes/votes';
 import commentRoutes from './routes/comments';
 import { users } from './db/schema';
 
+// Import D1Database type from Cloudflare Workers types
+type D1Database = import('@cloudflare/workers-types').D1Database;
+
 // Create the main Hono application
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -38,11 +41,11 @@ app.use('*', async (c, next) => {
     // Create a mock DB for testing
     c.env = {
       ...c.env,
-      DB: {}, // Mock DB object
+      DB: {} as D1Database, // Mock DB object
       JWT_SECRET: 'test-secret-key' // Mock JWT secret for testing
     };
   }
-  
+
   const db = createDb(c.env.DB);
   c.set('db', db);
   await next();
@@ -61,20 +64,20 @@ app.get('/', async (c) => {
     const db = c.get('db');
     // Test database connection
     const result = await db.select().from(users).limit(1);
-    return c.json({ 
+    return c.json({
       message: 'Hacker News Clone API is running!',
-      jwtSecretKey: c.env.JWT_SECRET_KEY ? 'Set' : 'Not set',
+      jwtSecretKey: c.env.JWT_SECRET ? 'Set' : 'Not set',
       jwtSecret: c.env.JWT_SECRET ? 'Set' : 'Not set',
       database: 'Connected',
       users: result.length
     });
   } catch (error) {
-    return c.json({ 
+    return c.json({
       message: 'Hacker News Clone API is running!',
-      jwtSecretKey: c.env.JWT_SECRET_KEY ? 'Set' : 'Not set',
+      jwtSecretKey: c.env.JWT_SECRET ? 'Set' : 'Not set',
       jwtSecret: c.env.JWT_SECRET ? 'Set' : 'Not set',
       database: 'Error',
-      error: error.message
+      error: (error as Error).message
     });
   }
 });

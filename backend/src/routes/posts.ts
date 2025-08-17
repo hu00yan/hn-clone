@@ -13,7 +13,7 @@ const app = new Hono<{ Bindings: Env; Variables: Variables }>();
  */
 app.get('/hot', async (c) => {
   const db = c.get('db');
-  
+
   // Simple hot algorithm: score = upvotes - downvotes
   // In a real app, you might use a more complex algorithm like Reddit's
   const hotPosts = await db.select({
@@ -31,8 +31,36 @@ app.get('/hot', async (c) => {
   .leftJoin(users, eq(posts.authorId, users.id))
   .orderBy(desc(sql`(${posts.upvotes} - ${posts.downvotes})`), desc(posts.createdAt))
   .limit(30); // Limit to 30 posts to prevent excessive data transfer
-  
+
   return c.json(hotPosts);
+});
+
+/**
+ * GET /posts/new
+ * Retrieve the newest posts sorted by creation time
+ * @returns Array of posts with author information and vote counts
+ */
+app.get('/new', async (c) => {
+  const db = c.get('db');
+
+  // Get newest posts ordered by creation time
+  const newPosts = await db.select({
+    id: posts.id,
+    title: posts.title,
+    url: posts.url,
+    text: posts.text,
+    author: users.username,
+    createdAt: posts.createdAt,
+    upvotes: posts.upvotes,
+    downvotes: posts.downvotes,
+    score: sql<number>`(${posts.upvotes} - ${posts.downvotes})`
+  })
+  .from(posts)
+  .innerJoin(users, eq(posts.authorId, users.id))
+  .orderBy(desc(posts.createdAt))
+  .limit(30);
+
+  return c.json(newPosts);
 });
 
 /**
@@ -45,7 +73,7 @@ app.get('/:id', async (c) => {
   const db = c.get('db');
   // Parse the post ID from the URL parameter
   const postId = parseInt(c.req.param('id'));
-  
+
   // Query the database for the post with author information
   const result = await db.select({
     id: posts.id,
@@ -61,12 +89,12 @@ app.get('/:id', async (c) => {
   .leftJoin(users, eq(posts.authorId, users.id))
   .where(eq(posts.id, postId))
   .limit(1); // Limit to 1 result since we're looking for a specific post
-  
+
   // Return 404 if post not found
   if (result.length === 0) {
     return c.json({ error: 'Post not found' }, 404);
   }
-  
+
   return c.json(result[0]);
 });
 
@@ -81,15 +109,15 @@ app.get('/:id', async (c) => {
 app.post('/submit', authMiddleware, async (c) => {
   const db = c.get('db');
   const user = c.get('user');
-  
+
   // Parse the request body
   const { title, url, text } = await c.req.json();
-  
+
   // Validate input - title is required, and either URL or text must be provided
   if (!title || (!url && !text)) {
     return c.json({ error: 'Title and either URL or text are required' }, 400);
   }
-  
+
   // Create the new post object without createdAt to let the database set it
   const newPost = {
     title,
@@ -97,11 +125,11 @@ app.post('/submit', authMiddleware, async (c) => {
     text: text || null,
     authorId: user.id, // Use the authenticated user's ID
   };
-  
+
   // Insert the new post into the database
   const result = await db.insert(posts).values(newPost).returning();
   const post = result[0];
-  
+
   return c.json(post);
 });
 

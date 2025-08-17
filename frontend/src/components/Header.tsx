@@ -11,6 +11,22 @@ export default function Header() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsLoggedIn(!!token);
+    
+    // Listen for storage changes (e.g., when token is set after login)
+    const handleStorageChange = () => {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(!!token);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check periodically in case storage event doesn't fire
+    const interval = setInterval(handleStorageChange, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -47,7 +63,7 @@ export default function Header() {
               <Link href="/" className="hover:underline">
                 jobs
               </Link>
-              <Link href="/" className="hover:underline">
+              <Link href="/submit" className="hover:underline">
                 submit
               </Link>
             </nav>

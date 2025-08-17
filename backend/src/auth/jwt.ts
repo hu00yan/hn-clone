@@ -7,13 +7,13 @@ const SALT_ROUNDS = 10;
 export async function signJwt(payload: any, env: Env) {
   // JWT_SECRET_KEY must be set in environment variables for production
   // Fall back to JWT_SECRET for backward compatibility
-  const jwtSecret = env.JWT_SECRET_KEY || env.JWT_SECRET;
+  const jwtSecret = env.JWT_SECRET;
   if (!jwtSecret) {
-    throw new Error('JWT_SECRET_KEY is not set in environment variables');
+    throw new Error('JWT_SECRET is not set in environment variables');
   }
-  
+
   const secret = new TextEncoder().encode(jwtSecret);
-  
+
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + 60 * 60 * 24 * 7; // 7 days
 
@@ -28,13 +28,13 @@ export async function verifyJwt(token: string, env: Env) {
   try {
     // JWT_SECRET_KEY must be set in environment variables for production
     // Fall back to JWT_SECRET for backward compatibility
-    const jwtSecret = env.JWT_SECRET_KEY || env.JWT_SECRET;
+    const jwtSecret = env.JWT_SECRET;
     if (!jwtSecret) {
-      throw new Error('JWT_SECRET_KEY is not set in environment variables');
+      throw new Error('JWT_SECRET is not set in environment variables');
     }
-    
+
     const secret = new TextEncoder().encode(jwtSecret);
-    
+
     const { payload } = await jwtVerify(token, secret);
     return payload;
   } catch {
