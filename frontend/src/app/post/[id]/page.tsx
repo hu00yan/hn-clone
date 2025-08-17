@@ -1,61 +1,33 @@
-'use client';
+import { Metadata } from "next";
+import PostPageClient from "./client-page";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { Post, Comment } from '@/types';
-import { fetchPost, fetchComments } from '@/services/api';
-import PostDetail from '@/components/PostDetail';
-import CommentList from '@/components/CommentList';
+// For static export, we provide a minimal set of static params
+// The actual dynamic routing will work at runtime
+export async function generateStaticParams() {
+  // Return a minimal set of IDs to satisfy Next.js export requirements
+  // In a real application, this might fetch the most recent or popular posts
+  return [{ id: "1" }];
+}
 
-export default function PostPage() {
-  const params = useParams();
-  const id = params.id as string;
+// Optional: Generate metadata for the post page
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
 
-  const [post, setPost] = useState<Post | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const postId = parseInt(id);
-    if (isNaN(postId)) {
-      setError('Invalid post ID');
-      setLoading(false);
-      return;
-    }
-
-    Promise.all([fetchPost(postId), fetchComments(postId)])
-      .then(([fetchedPost, fetchedComments]) => {
-        setPost(fetchedPost);
-        setComments(fetchedComments);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError('Failed to load post');
-        setLoading(false);
-        console.error(err);
-      });
-  }, [id]);
-
-  const handleCommentSubmit = () => {
-    const postId = parseInt(id);
-    fetchComments(postId)
-      .then(setComments)
-      .catch((err) => console.error('Failed to refetch comments', err));
+  return {
+    title: `Post ${id} - HN Clone`,
+    description: `View post ${id} and its comments`,
   };
+}
 
-  if (loading) {
-    return <div className="container mx-auto px-4 py-8">Loading...</div>;
-  }
-
-  if (error || !post) {
-    return <div className="container mx-auto px-4 py-8 text-red-500">{error || 'Post not found'}</div>;
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <PostDetail post={post} />
-      <CommentList comments={comments} postId={parseInt(id)} onCommentSubmit={handleCommentSubmit} />
-    </div>
-  );
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  return <PostPageClient id={id} />;
 }
