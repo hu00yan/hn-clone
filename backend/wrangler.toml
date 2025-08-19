@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 [[ d1_databases ]]
 binding = "DB" # Available in your worker on env.DB
 database_name = "hn-clone-db"
-database_id = "0f0bef4a-7de0-46d5-877e-20b9cc09f672" # Actual database ID
+database_id = "78adfc48-0926-48c5-91d6-9f85b876a5d2" # Actual database ID
 migrations_dir = "drizzle"
 
 # Environment variables

@@ -61,9 +61,9 @@ test.describe('HN Clone Full Workflow', () => {
     await page.click('text=submit');
     await expect(page).toHaveURL(/.*\/submit/);
 
-    await page.fill('input[id="title"]', testPost.title);
-    await page.fill('input[id="url"]', testPost.url);
-    await page.fill('textarea[id="text"]', testPost.text);
+    await page.fill('input[name="title"]', testPost.title);
+    await page.fill('input[name="url"]', testPost.url);
+    await page.fill('textarea[name="text"]', testPost.text);
     await page.click('button[type="submit"]');
 
     // Should redirect to homepage or post page
@@ -82,13 +82,13 @@ test.describe('HN Clone Full Workflow', () => {
     await page.waitForLoadState('networkidle');
 
     // Verify we're on the post detail page
-    await expect(page.locator('h1').first()).toContainText(testPost.title);
+    await expect(page.locator('h1, h2')).toContainText(testPost.title);
     if (testPost.text) {
       await expect(page.locator('text=' + testPost.text)).toBeVisible();
     }
 
     // Step 7: Vote on the post (upvote)
-    const upvoteButton = page.locator('button:has-text("▲")').first();
+    const upvoteButton = page.locator('[data-testid="upvote"], .upvote, text=▲').first();
     if (await upvoteButton.isVisible()) {
       await upvoteButton.click();
       await page.waitForTimeout(1000); // Wait for vote to register
@@ -96,7 +96,7 @@ test.describe('HN Clone Full Workflow', () => {
 
     // Step 8: Add a comment
     const commentText = `Great post! Comment added at ${new Date().toISOString()}`;
-    const commentInput = page.locator('textarea[id="text"], textarea[placeholder*="comment" i]').first();
+    const commentInput = page.locator('textarea[name="text"], textarea[placeholder*="comment" i]').first();
 
     if (await commentInput.isVisible()) {
       await commentInput.fill(commentText);
@@ -162,7 +162,7 @@ test.describe('HN Clone Full Workflow', () => {
 
     // Basic page structure should be visible
     await expect(page.locator('header')).toBeVisible();
-    await expect(page.locator('body')).toBeVisible();
+    await expect(page.locator('main')).toBeVisible();
     await expect(page.locator('h1')).toContainText('Hacker News Clone');
 
     // Navigation should be present
@@ -200,7 +200,7 @@ test.describe('HN Clone Full Workflow', () => {
     // Should either show 404 or error message
     await page.locator('text=not found, text=error, text=404').first().isVisible().catch(() => false);
     // This might not error immediately due to client-side routing, so we'll just check it loads
-    await expect(page.locator('body')).toBeVisible();
+    await expect(page.locator('main')).toBeVisible();
   });
 
   test('Performance is acceptable', async ({ page }) => {

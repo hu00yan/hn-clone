@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Post } from '@/types';
-import { fetchHotPosts } from '@/services/api';
-import PostItem from '@/components/PostItem';
+import { useEffect, useState } from "react";
+import { Post } from "@/types";
+import { fetchHotPosts } from "../services/api";
+import PostItem from "./PostItem";
 
 export default function PostList() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -18,7 +18,7 @@ export default function PostList() {
       })
       .catch((err) => {
         console.error(err);
-        if (mounted) setError('Failed to load posts');
+        if (mounted) setError("Failed to load posts");
       })
       .finally(() => {
         if (mounted) setLoading(false);

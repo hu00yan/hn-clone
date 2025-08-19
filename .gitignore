@@ -8,12 +8,14 @@ node_modules/
 .next/
 dist/
 build/
+out/
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+*.log
 
 # Runtime data
 pids/
@@ -24,6 +26,8 @@ pids/
 # Testing
 coverage/
 .nyc_output/
+test-results/
+*.test.*
 
 # Environment files
 .env*
@@ -39,7 +43,7 @@ coverage/
 # OS generated files
 .DS_Store
 .DS_Store?
-._*
+._
 .Spotlight-V100
 .Trashes
 ehthumbs.db
@@ -63,7 +67,6 @@ tramp
 .AppleDouble/
 .LSOverride/
 Icon?
-._*
 
 # Windows
 Thumbs.db:encryptable
@@ -87,9 +90,33 @@ temp/
 .vercel/
 
 # Cloudflare Wrangler
- wrangler.toml*.sqlite
-node_modules/
+wrangler.toml*.sqlite
 .wrangler/state
 .wrangler/
-node_modules/
-.wrangler/
+
+# Package lock files
+package-lock.json
+pnpm-lock.yaml*.yaml
+
+# Build artifacts
+*.tsbuildinfo
+export.log
+build.log
+
+# MCP
+mcp-config.json
+# Playwright
+playwright-report/
+test-results/
+# Temporary test files
+*.tmp
+*.temp
+integration-test.ts
+test-auth.ts
+test-compile.ts
+test-db-connection.ts
+test-hono.ts
+test-jwt.ts
+test-routes.ts
+test-schema.ts
+backend.log
