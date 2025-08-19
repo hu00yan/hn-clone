@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth";
 import postRoutes from "./routes/posts";
 import voteRoutes from "./routes/votes";
 import commentRoutes from "./routes/comments";
+import healthRoutes from "./health";
 import { users } from "./db/schema";
 
 // Import D1Database type from Cloudflare Workers types
@@ -57,6 +58,7 @@ app.route("/auth", authRoutes);
 app.route("/posts", postRoutes);
 app.route("/votes", voteRoutes);
 app.route("/comments", commentRoutes);
+app.route("/health", healthRoutes);
 
 // Health check endpoint
 app.get("/", async (c) => {
