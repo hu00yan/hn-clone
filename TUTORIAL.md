@@ -122,13 +122,13 @@ main = "src/index.ts"
 compatibility_date = "2024-08-16"
 
 [vars]
-JWT_SECRET = "mfVxIxhVrW0tuU2XUaxLH4jEpPYg5DgW7Uo8aB2eF8nK"
+JWT_SECRET = "CHANGE_ME_IN_PRODUCTION"
 DATABASE_ID = "your-database-id"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "hn-clone-db"
-database_id = "78adfc48-0926-48c5-91d6-9f85b876a5d2"
+database_id = "your-database-id-here"
 EOF
 
 # 创建 TypeScript 配置
