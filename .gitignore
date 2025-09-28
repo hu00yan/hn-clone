@@ -120,3 +120,4 @@ test-jwt.ts
 test-routes.ts
 test-schema.ts
 backend.log
+.aider*

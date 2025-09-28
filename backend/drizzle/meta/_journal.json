@@ -15,6 +15,13 @@
       "when": 1755399717636,
       "tag": "0001_odd_maverick",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1759060927541,
+      "tag": "0002_modern_kate_bishop",
+      "breakpoints": true
     }
   ]
 }

@@ -74,15 +74,14 @@ describe('Auth Routes', () => {
   it('should login an existing user', async () => {
     // Reset mock calls
     vi.clearAllMocks();
-    
-    // Mock the select query to return a user
+
+    // Mock the select query to return a user (select operations resolve directly, don't use returning)
     mockDb.select.mockReturnValueOnce(mockDb);
     mockDb.from.mockReturnValueOnce(mockDb);
     mockDb.where.mockReturnValueOnce(mockDb);
-    mockDb.limit.mockReturnValueOnce(mockDb);
-    mockDb.returning.mockResolvedValueOnce([{ 
-      id: 1, 
-      email: 'test@example.com', 
+    mockDb.limit.mockResolvedValueOnce([{
+      id: 1,
+      email: 'test@example.com',
       username: 'testuser',
       password: mockHashedPassword // Mock hashed password
     }]);

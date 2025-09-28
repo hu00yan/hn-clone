@@ -3,14 +3,13 @@
   "private": true,
   "packageManager": "pnpm@10.14.0",
   "workspaces": [
-    "shared",
     "backend",
     "frontend"
   ],
   "scripts": {
-    "dev": "pnpm --filter backend dev & pnpm --filter frontend dev",
-    "build": "pnpm --filter backend build && pnpm --filter frontend build",
-    "test": "pnpm --filter backend test && pnpm --filter frontend test",
-    "deploy": "pnpm --filter backend deploy && pnpm --filter frontend deploy"
+    "dev": "pnpm --filter hn-clone-backend dev & pnpm --filter hn-clone-frontend dev",
+    "build": "pnpm --filter hn-clone-backend build && pnpm --filter hn-clone-frontend build",
+    "test": "pnpm --filter hn-clone-backend test && pnpm --filter hn-clone-frontend test",
+    "deploy": "pnpm --filter hn-clone-backend deploy && pnpm --filter hn-clone-frontend deploy"
   }
 }

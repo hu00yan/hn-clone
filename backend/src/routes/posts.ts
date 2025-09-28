@@ -1,96 +1,210 @@
 import { Hono } from 'hono';
-import { Env, Variables, NewPost } from '../types';
-import { desc, eq, sql } from 'drizzle-orm';
+import { Env, Variables } from '../types';
+import { desc, eq, sql, and, inArray } from 'drizzle-orm';
 import { posts, users } from '../db/schema';
 import { authMiddleware } from '../auth/middleware';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
+// 计算热度（自然衰减，避免使用 SQLite 的 pow/sqrt，提升兼容性）
+// rank = upvotes / (age_hours + 2)
+const rankExpr = sql<number>`
+  ( (${posts.upvotes} * 1.0) /
+    ( ((strftime('%s','now') - ${posts.createdAt}) / 3600.0) + 2.0 )
+  )
+`;
+
 /**
  * GET /posts/hot
- * Retrieve the hottest posts sorted by score (upvotes - downvotes) and creation time
- * @returns Array of posts with author information and vote counts
+ * story/ask/show，按热度衰减排序（仅 upvote）
  */
 app.get('/hot', async (c) => {
   const db = c.get('db');
 
-  // Simple hot algorithm: score = upvotes - downvotes
-  // In a real app, you might use a more complex algorithm like Reddit's
-  const hotPosts = await db.select({
-    id: posts.id,
-    title: posts.title,
-    url: posts.url,
-    text: posts.text,
-    author: users.username,
-    createdAt: posts.createdAt,
-    upvotes: posts.upvotes,
-    downvotes: posts.downvotes,
-    score: sql<number>`(${posts.upvotes} - ${posts.downvotes})`
-  })
-  .from(posts)
-  .leftJoin(users, eq(posts.authorId, users.id))
-  .orderBy(desc(sql`(${posts.upvotes} - ${posts.downvotes})`), desc(posts.createdAt))
-  .limit(30); // Limit to 30 posts to prevent excessive data transfer
+  const hotPosts = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      url: posts.url,
+      text: posts.text,
+      type: posts.type,
+      author: users.username,
+      createdAt: posts.createdAt,
+      upvotes: posts.upvotes,
+      score: sql<number>`${posts.upvotes}`
+    })
+    .from(posts)
+    .leftJoin(users, eq(posts.authorId, users.id))
+    .where(
+      and(
+        eq(posts.isDeleted, false),
+        eq(posts.isDead, false),
+        inArray(posts.type, ['story', 'ask', 'show'])
+      )
+    )
+    .orderBy(desc(rankExpr), desc(posts.createdAt))
+    .limit(30);
 
   return c.json(hotPosts);
 });
 
 /**
  * GET /posts/new
- * Retrieve the newest posts sorted by creation time
- * @returns Array of posts with author information and vote counts
+ * GET /posts/newest (HN 兼容别名)
+ * story/ask/show，按创建时间倒序
  */
-app.get('/new', async (c) => {
+async function newestHandler(c: any) {
   const db = c.get('db');
+  const newest = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      url: posts.url,
+      text: posts.text,
+      type: posts.type,
+      author: users.username,
+      createdAt: posts.createdAt,
+      upvotes: posts.upvotes,
+      score: sql<number>`${posts.upvotes}`
+    })
+    .from(posts)
+    .leftJoin(users, eq(posts.authorId, users.id))
+    .where(
+      and(
+        eq(posts.isDeleted, false),
+        eq(posts.isDead, false),
+        inArray(posts.type, ['story', 'ask', 'show'])
+      )
+    )
+    .orderBy(desc(posts.createdAt))
+    .limit(30);
 
-  // Get newest posts ordered by creation time
-  const newPosts = await db.select({
-    id: posts.id,
-    title: posts.title,
-    url: posts.url,
-    text: posts.text,
-    author: users.username,
-    createdAt: posts.createdAt,
-    upvotes: posts.upvotes,
-    downvotes: posts.downvotes,
-    score: sql<number>`(${posts.upvotes} - ${posts.downvotes})`
-  })
-  .from(posts)
-  .innerJoin(users, eq(posts.authorId, users.id))
-  .orderBy(desc(posts.createdAt))
-  .limit(30);
+  return c.json(newest);
+}
+app.get('/new', newestHandler);
+app.get('/newest', newestHandler);
 
-  return c.json(newPosts);
+/**
+ * GET /posts/ask
+ */
+app.get('/ask', async (c) => {
+  const db = c.get('db');
+  const rows = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      url: posts.url,
+      text: posts.text,
+      type: posts.type,
+      author: users.username,
+      createdAt: posts.createdAt,
+      upvotes: posts.upvotes,
+      score: sql<number>`${posts.upvotes}`
+    })
+    .from(posts)
+    .leftJoin(users, eq(posts.authorId, users.id))
+    .where(
+      and(
+        eq(posts.isDeleted, false),
+        eq(posts.isDead, false),
+        eq(posts.type, 'ask')
+      )
+    )
+    .orderBy(desc(posts.createdAt))
+    .limit(30);
+
+  return c.json(rows);
+});
+
+/**
+ * GET /posts/show
+ */
+app.get('/show', async (c) => {
+  const db = c.get('db');
+  const rows = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      url: posts.url,
+      text: posts.text,
+      type: posts.type,
+      author: users.username,
+      createdAt: posts.createdAt,
+      upvotes: posts.upvotes,
+      score: sql<number>`${posts.upvotes}`
+    })
+    .from(posts)
+    .leftJoin(users, eq(posts.authorId, users.id))
+    .where(
+      and(
+        eq(posts.isDeleted, false),
+        eq(posts.isDead, false),
+        eq(posts.type, 'show')
+      )
+    )
+    .orderBy(desc(posts.createdAt))
+    .limit(30);
+
+  return c.json(rows);
+});
+
+/**
+ * GET /posts/jobs
+ */
+app.get('/jobs', async (c) => {
+  const db = c.get('db');
+  const rows = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      url: posts.url,
+      text: posts.text,
+      type: posts.type,
+      author: users.username,
+      createdAt: posts.createdAt,
+      // jobs 通常不计分，不返回 score 也行
+      upvotes: posts.upvotes,
+      score: sql<number>`${posts.upvotes}`
+    })
+    .from(posts)
+    .leftJoin(users, eq(posts.authorId, users.id))
+    .where(
+      and(
+        eq(posts.isDeleted, false),
+        eq(posts.isDead, false),
+        eq(posts.type, 'job')
+      )
+    )
+    .orderBy(desc(posts.createdAt))
+    .limit(30);
+
+  return c.json(rows);
 });
 
 /**
  * GET /posts/:id
- * Retrieve a single post by ID with author information
- * @param id - Post ID
- * @returns Post object with author information and vote counts
+ * 单帖详情
  */
 app.get('/:id', async (c) => {
   const db = c.get('db');
-  // Parse the post ID from the URL parameter
   const postId = parseInt(c.req.param('id'));
 
-  // Query the database for the post with author information
-  const result = await db.select({
-    id: posts.id,
-    title: posts.title,
-    url: posts.url,
-    text: posts.text,
-    author: users.username,
-    createdAt: posts.createdAt,
-    upvotes: posts.upvotes,
-    downvotes: posts.downvotes
-  })
-  .from(posts)
-  .leftJoin(users, eq(posts.authorId, users.id))
-  .where(eq(posts.id, postId))
-  .limit(1); // Limit to 1 result since we're looking for a specific post
+  const result = await db
+    .select({
+      id: posts.id,
+      title: posts.title,
+      url: posts.url,
+      text: posts.text,
+      type: posts.type,
+      author: users.username,
+      createdAt: posts.createdAt,
+      upvotes: posts.upvotes
+    })
+    .from(posts)
+    .leftJoin(users, eq(posts.authorId, users.id))
+    .where(eq(posts.id, postId))
+    .limit(1);
 
-  // Return 404 if post not found
   if (result.length === 0) {
     return c.json({ error: 'Post not found' }, 404);
   }
@@ -100,37 +214,50 @@ app.get('/:id', async (c) => {
 
 /**
  * POST /posts/submit
- * Submit a new post (requires authentication)
- * @param title - Post title (required)
- * @param url - Post URL (optional, required if no text)
- * @param text - Post text content (optional, required if no URL)
- * @returns The newly created post
+ * 支持 type：story|ask|show|job，且进行互斥校验
  */
 app.post('/submit', authMiddleware, async (c) => {
   const db = c.get('db');
   const user = c.get('user');
 
-  // Parse the request body
-  const { title, url, text } = await c.req.json();
+  const body = await c.req.json();
+  const rawType = (body?.type ?? 'story') as string;
+  const type = ['story', 'ask', 'show', 'job'].includes(rawType) ? (rawType as 'story'|'ask'|'show'|'job') : 'story';
 
-  // Validate input - title is required, and either URL or text must be provided
-  if (!title || (!url && !text)) {
-    return c.json({ error: 'Title and either URL or text are required' }, 400);
+  const title: string | undefined = body?.title;
+  const url: string | undefined = body?.url ?? undefined;
+  const text: string | undefined = body?.text ?? undefined;
+
+  if (!title) {
+    return c.json({ error: 'title is required' }, 400);
   }
 
-  // Create the new post object without createdAt to let the database set it
-  const newPost = {
-    title,
-    url: url || null,
-    text: text || null,
-    authorId: user.id, // Use the authenticated user's ID
-  };
+  // 互斥规则与必填
+  if (type === 'ask') {
+    if (!text || url) {
+      return c.json({ error: 'Ask HN must include text only (no url)' }, 400);
+    }
+  } else {
+    const hasUrl = Boolean(url && url.trim());
+    const hasText = Boolean(text && text.trim());
+    if (hasUrl === hasText) {
+      return c.json({ error: 'Provide exactly one of url or text' }, 400);
+    }
+  }
 
-  // Insert the new post into the database
-  const result = await db.insert(posts).values(newPost).returning();
-  const post = result[0];
+  const result = await db
+    .insert(posts)
+    .values({
+      title,
+      url: url ?? null,
+      text: text ?? null,
+      type,
+      authorId: user.id
+      // createdAt 由数据库默认赋值
+    })
+    .returning();
 
-  return c.json(post);
+  return c.json(result[0]);
 });
 
 export default app;

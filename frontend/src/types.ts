@@ -9,20 +9,24 @@ export interface Post {
   title: string;
   url?: string;
   text?: string;
-  author: string;
+  type: 'story' | 'ask' | 'show' | 'job';
+  author: string; // username from joined users table
+  authorId: number; // for internal use
   createdAt: Date;
   upvotes: number;
-  downvotes: number;
+  downvotes?: number;
   score?: number;
 }
 
 export interface Comment {
   id: number;
   postId: number;
+  authorId: number;
+  author: string; // username from joined users table
   text: string;
   createdAt: Date;
-  author: string;
   parentId?: number;
+  score: number;
 }
 
 export interface AuthResponse {

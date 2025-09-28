@@ -57,21 +57,22 @@ describe('Posts Routes', () => {
   it('should get hot posts', async () => {
     // Reset mock calls
     vi.clearAllMocks();
-    
-    // Properly mock the database chain
+
+    // Properly mock the database chain (select operations resolve directly)
     mockDb.select.mockReturnValueOnce(mockDb);
     mockDb.from.mockReturnValueOnce(mockDb);
     mockDb.leftJoin.mockReturnValueOnce(mockDb);
+    mockDb.where.mockReturnValueOnce(mockDb);
     mockDb.orderBy.mockReturnValueOnce(mockDb);
-    mockDb.limit.mockReturnValueOnce(mockDb);
-    mockDb.returning.mockResolvedValueOnce([
-      { 
-        id: 1, 
+    mockDb.limit.mockResolvedValueOnce([
+      {
+        id: 1,
         title: 'Test Post',
         author: 'testuser',
         upvotes: 10,
-        downvotes: 2,
-        score: 8
+        createdAt: new Date(),
+        score: 8,
+        type: 'story'
       }
     ]);
 
